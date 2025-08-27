@@ -11,7 +11,7 @@ class HubApi {
 
     async getTagHierarchy(): Promise<TagHierarchyNode> {
         try {
-            const response = await fetch(`${this.baseUrl}/get-tag-hierarchy`, {
+            const response = await fetch(`${this.baseUrl}/get-portfolio-tag-hierarchy`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

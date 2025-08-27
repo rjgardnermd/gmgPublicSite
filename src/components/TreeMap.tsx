@@ -177,7 +177,6 @@ const TreeMap: React.FC = () => {
     return (
         <div style={{ padding: '20px' }}>
             <h1>Stock Sector TreeMap</h1>
-            <p>Visualization of different stock sectors and their relative weights</p>
 
             {/* Breadcrumb navigation */}
             {breadcrumb.length > 1 && (

@@ -34,20 +34,17 @@ const TreeMap: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        // Sample data for 6 stock sectors
-        const data: TreeMapNode = {
-            name: "root",
-            children: [
-                { name: "Tech", value: 30, color: "#2196F3" },
-                { name: "Energy", value: 25, color: "#FF9800" },
-                { name: "Healthcare", value: 20, color: "#4CAF50" },
-                { name: "Finance", value: 15, color: "#9C27B0" },
-                { name: "Consumer", value: 8, color: "#F44336" },
-                { name: "Industrial", value: 2, color: "#607D8B" }
-            ]
-        };
+        if (!svgRef.current || !tagHierarchy) return;
 
-        if (!svgRef.current) return;
+        // Convert tag hierarchy to TreeMap format
+        const data: TreeMapNode = {
+            name: tagHierarchy.name,
+            children: tagHierarchy.children.map((child, index) => ({
+                name: child.name,
+                value: child.value,
+                color: getColorForIndex(index)
+            }))
+        };
 
         // Clear previous content
         d3.select(svgRef.current).selectAll("*").remove();
@@ -117,20 +114,29 @@ const TreeMap: React.FC = () => {
             .style("pointer-events", "none")
             .text(d => `${d.data.value}%`);
 
-    }, []);
+    }, [tagHierarchy]);
+
+    // Helper function to generate colors for different sectors
+    const getColorForIndex = (index: number): string => {
+        const colors = [
+            "#2196F3", // Blue
+            "#FF9800", // Orange
+            "#4CAF50", // Green
+            "#9C27B0", // Purple
+            "#F44336", // Red
+            "#607D8B", // Blue Grey
+            "#795548", // Brown
+            "#FF5722", // Deep Orange
+            "#00BCD4", // Cyan
+            "#E91E63"  // Pink
+        ];
+        return colors[index % colors.length];
+    };
 
     return (
         <div style={{ padding: '20px' }}>
             <h1>Stock Sector TreeMap</h1>
             <p>Visualization of different stock sectors and their relative weights</p>
-            {tagHierarchy && (
-                <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-                    <h3>Loaded Tag Hierarchy:</h3>
-                    <p><strong>Root Name:</strong> {tagHierarchy.name}</p>
-                    <p><strong>Total Value:</strong> {tagHierarchy.value}</p>
-                    <p><strong>Number of Top-Level Tags:</strong> {tagHierarchy.children.length}</p>
-                </div>
-            )}
             <svg ref={svgRef} style={{ border: '1px solid #ccc', borderRadius: '8px' }}></svg>
         </div>
     );

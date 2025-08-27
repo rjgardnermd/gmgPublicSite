@@ -38,18 +38,25 @@ const TreeMap: React.FC = () => {
         fetchTagHierarchy();
     }, []);
 
+    // Helper function to normalize values to sum to 100
+    const normalizeValues = (nodes: TagHierarchyNode[]): TreeMapData[] => {
+        const totalValue = nodes.reduce((sum, node) => sum + node.value, 0);
+
+        return nodes.map((child, index) => ({
+            name: child.name,
+            value: totalValue > 0 ? (child.value / totalValue) * 100 : 0,
+            color: getColorForIndex(index),
+            node: child
+        }));
+    };
+
     useEffect(() => {
         if (!svgRef.current || !currentNode) return;
 
-        // Convert current node to TreeMap format
+        // Convert current node to TreeMap format with normalized values
         const data: TreeMapNode = {
             name: currentNode.name,
-            children: currentNode.children.map((child, index) => ({
-                name: child.name,
-                value: child.value,
-                color: getColorForIndex(index),
-                node: child
-            }))
+            children: normalizeValues(currentNode.children)
         };
 
         // Clear previous content
@@ -118,7 +125,7 @@ const TreeMap: React.FC = () => {
             .attr("fill", "white")
             .attr("font-size", d => Math.min(12, (d.x1 - d.x0) / 10))
             .style("pointer-events", "none")
-            .text(d => `${d.data.value}%`);
+            .text(d => `${d.data.value.toFixed(1)}%`);
 
     }, [currentNode]);
 

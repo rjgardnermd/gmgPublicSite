@@ -7,6 +7,7 @@ interface TreeMapData {
     name: string;
     value: number;
     color: string;
+    node: TagHierarchyNode; // Store reference to original node
 }
 
 interface TreeMapNode {
@@ -17,6 +18,8 @@ interface TreeMapNode {
 const TreeMap: React.FC = () => {
     const svgRef = useRef<SVGSVGElement>(null);
     const [tagHierarchy, setTagHierarchy] = useState<TagHierarchyNode | null>(null);
+    const [currentNode, setCurrentNode] = useState<TagHierarchyNode | null>(null);
+    const [breadcrumb, setBreadcrumb] = useState<string[]>([]);
 
     // Call the hub API to get tag hierarchy
     useEffect(() => {
@@ -25,6 +28,8 @@ const TreeMap: React.FC = () => {
                 const data = await hubApi.getTagHierarchy();
                 console.log('Tag hierarchy data:', data);
                 setTagHierarchy(data);
+                setCurrentNode(data);
+                setBreadcrumb([data.name]);
             } catch (error) {
                 console.error('Failed to fetch tag hierarchy:', error);
             }
@@ -34,15 +39,16 @@ const TreeMap: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (!svgRef.current || !tagHierarchy) return;
+        if (!svgRef.current || !currentNode) return;
 
-        // Convert tag hierarchy to TreeMap format
+        // Convert current node to TreeMap format
         const data: TreeMapNode = {
-            name: tagHierarchy.name,
-            children: tagHierarchy.children.map((child, index) => ({
+            name: currentNode.name,
+            children: currentNode.children.map((child, index) => ({
                 name: child.name,
                 value: child.value,
-                color: getColorForIndex(index)
+                color: getColorForIndex(index),
+                node: child
             }))
         };
 
@@ -88,7 +94,7 @@ const TreeMap: React.FC = () => {
             .attr("stroke-width", 2)
             .style("cursor", "pointer")
             .on("click", function (event, d) {
-                console.log("Clicked on:", d.data.name);
+                handleNodeClick(d.data.node);
             });
 
         // Add labels
@@ -114,7 +120,42 @@ const TreeMap: React.FC = () => {
             .style("pointer-events", "none")
             .text(d => `${d.data.value}%`);
 
-    }, [tagHierarchy]);
+    }, [currentNode]);
+
+    // Handle node click for drill-down
+    const handleNodeClick = (node: TagHierarchyNode) => {
+        console.log("Clicked on:", node.name);
+
+        if (node.children && node.children.length > 0) {
+            // Drill down to children
+            setCurrentNode(node);
+            setBreadcrumb([...breadcrumb, node.name]);
+        } else {
+            // This is a leaf node (symbol level)
+            console.log("Reached symbol level:", node);
+        }
+    };
+
+    // Handle breadcrumb navigation
+    const handleBreadcrumbClick = (index: number) => {
+        if (index === 0) {
+            // Go back to root
+            setCurrentNode(tagHierarchy);
+            setBreadcrumb([tagHierarchy!.name]);
+        } else {
+            // Navigate to specific level
+            const newBreadcrumb = breadcrumb.slice(0, index + 1);
+            setBreadcrumb(newBreadcrumb);
+
+            // Find the node at this level
+            let targetNode = tagHierarchy;
+            for (let i = 1; i <= index; i++) {
+                const childName = newBreadcrumb[i];
+                targetNode = targetNode!.children.find(child => child.name === childName)!;
+            }
+            setCurrentNode(targetNode);
+        }
+    };
 
     // Helper function to generate colors for different sectors
     const getColorForIndex = (index: number): string => {
@@ -137,6 +178,33 @@ const TreeMap: React.FC = () => {
         <div style={{ padding: '20px' }}>
             <h1>Stock Sector TreeMap</h1>
             <p>Visualization of different stock sectors and their relative weights</p>
+
+            {/* Breadcrumb navigation */}
+            {breadcrumb.length > 1 && (
+                <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#2c3e50', borderRadius: '4px' }}>
+                    <span style={{ fontWeight: 'bold', color: '#ecf0f1' }}>Navigation: </span>
+                    {breadcrumb.map((item, index) => (
+                        <span key={index}>
+                            <button
+                                onClick={() => handleBreadcrumbClick(index)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#3498db',
+                                    cursor: 'pointer',
+                                    textDecoration: 'underline',
+                                    margin: '0 5px',
+                                    fontWeight: '500'
+                                }}
+                            >
+                                {item}
+                            </button>
+                            {index < breadcrumb.length - 1 && <span style={{ color: '#95a5a6' }}> → </span>}
+                        </span>
+                    ))}
+                </div>
+            )}
+
             <svg ref={svgRef} style={{ border: '1px solid #ccc', borderRadius: '8px' }}></svg>
         </div>
     );

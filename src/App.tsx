@@ -38,15 +38,15 @@ function App() {
   return (
     <Router>
       <div>
-        <nav style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
+        {/* <nav style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
           <Link to="/" style={{ marginRight: '20px', textDecoration: 'none', color: '#333' }}>
             Home
           </Link>
           <Link to="/treemap" style={{ textDecoration: 'none', color: '#333' }}>
             TreeMap
           </Link>
-        </nav>
-        
+        </nav> */}
+
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/treemap" element={<TreeMap />} />

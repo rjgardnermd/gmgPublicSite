@@ -1,5 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { hubApi } from '../api/hubApi';
+import type { TagHierarchyNode } from '../models/TagHierarchy';
 
 interface TreeMapData {
     name: string;
@@ -14,6 +16,22 @@ interface TreeMapNode {
 
 const TreeMap: React.FC = () => {
     const svgRef = useRef<SVGSVGElement>(null);
+    const [tagHierarchy, setTagHierarchy] = useState<TagHierarchyNode | null>(null);
+
+    // Call the hub API to get tag hierarchy
+    useEffect(() => {
+        const fetchTagHierarchy = async () => {
+            try {
+                const data = await hubApi.getTagHierarchy();
+                console.log('Tag hierarchy data:', data);
+                setTagHierarchy(data);
+            } catch (error) {
+                console.error('Failed to fetch tag hierarchy:', error);
+            }
+        };
+
+        fetchTagHierarchy();
+    }, []);
 
     useEffect(() => {
         // Sample data for 6 stock sectors
@@ -105,6 +123,14 @@ const TreeMap: React.FC = () => {
         <div style={{ padding: '20px' }}>
             <h1>Stock Sector TreeMap</h1>
             <p>Visualization of different stock sectors and their relative weights</p>
+            {tagHierarchy && (
+                <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                    <h3>Loaded Tag Hierarchy:</h3>
+                    <p><strong>Root Name:</strong> {tagHierarchy.name}</p>
+                    <p><strong>Total Value:</strong> {tagHierarchy.value}</p>
+                    <p><strong>Number of Top-Level Tags:</strong> {tagHierarchy.children.length}</p>
+                </div>
+            )}
             <svg ref={svgRef} style={{ border: '1px solid #ccc', borderRadius: '8px' }}></svg>
         </div>
     );

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { reporterApi } from '../api/reporterApi';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { setLoading, setSuccess, setError } from '../store/slices/tagHierarchySlice';
 import type { TagHierarchyNode } from '../models/TagHierarchy';
 
 interface TreeMapData {
@@ -17,26 +19,29 @@ interface TreeMapNode {
 
 const TreeMap: React.FC = () => {
     const svgRef = useRef<SVGSVGElement>(null);
-    const [tagHierarchy, setTagHierarchy] = useState<TagHierarchyNode | null>(null);
+    const dispatch = useAppDispatch();
+    const { data: tagHierarchy, status, error } = useAppSelector(state => state.tagHierarchy);
     const [currentNode, setCurrentNode] = useState<TagHierarchyNode | null>(null);
     const [breadcrumb, setBreadcrumb] = useState<string[]>([]);
 
     // Call the reporter API to get tag hierarchy
     useEffect(() => {
         const fetchTagHierarchy = async () => {
+            dispatch(setLoading());
             try {
                 const data = await reporterApi.getTagHierarchy();
                 console.log('Tag hierarchy data:', data);
-                setTagHierarchy(data);
+                dispatch(setSuccess(data));
                 setCurrentNode(data);
                 setBreadcrumb([data.name]);
             } catch (error) {
                 console.error('Failed to fetch tag hierarchy:', error);
+                dispatch(setError(error instanceof Error ? error.message : 'Failed to fetch data'));
             }
         };
 
         fetchTagHierarchy();
-    }, []);
+    }, [dispatch]);
 
     // Helper function to normalize values to sum to 100
     const normalizeValues = (nodes: TagHierarchyNode[]): TreeMapData[] => {
@@ -180,6 +185,26 @@ const TreeMap: React.FC = () => {
         ];
         return colors[index % colors.length];
     };
+
+    // Show loading state
+    if (status === 'loading') {
+        return (
+            <div style={{ padding: '20px' }}>
+                <h1>Stock Sector TreeMap</h1>
+                <p>Loading...</p>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (status === 'failed') {
+        return (
+            <div style={{ padding: '20px' }}>
+                <h1>Stock Sector TreeMap</h1>
+                <p>Error: {error}</p>
+            </div>
+        );
+    }
 
     return (
         <div style={{ padding: '20px' }}>

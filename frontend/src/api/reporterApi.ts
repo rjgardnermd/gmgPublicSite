@@ -1,5 +1,6 @@
-import { env } from '../config/env';
 import type { TagHierarchyNode } from '../models/TagHierarchy';
+import type { TwrUpdateData } from '../models/TwrUpdate';
+import { env } from '../config/env';
 
 class ReporterApi {
     private baseUrl: string;
@@ -9,26 +10,24 @@ class ReporterApi {
     }
 
     async getTagHierarchy(): Promise<TagHierarchyNode> {
-        try {
-            const response = await fetch(`${this.baseUrl}/get-portfolio-tag-hierarchy`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+        const response = await fetch(`${this.baseUrl}/get-portfolio-tag-hierarchy`);
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error fetching tag hierarchy:', error);
-            throw error;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        return response.json();
+    }
+
+    async getTwr(): Promise<TwrUpdateData> {
+        const response = await fetch(`${this.baseUrl}/get-twr`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response.json();
     }
 }
 
-// Export a singleton instance
 export const reporterApi = new ReporterApi();

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { reporterApi } from '../api/reporterApi';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setLoading, setSuccess, setError } from '../store/slices/tagHierarchySlice';
+// import { reporterApi } from '../api/reporterApi';
+import { useAppSelector } from '../store/hooks';
+// import { setLoading, setSuccess, setError } from '../store/slices/tagHierarchySlice';
 import type { TagHierarchyNode } from '../models/TagHierarchy';
 
 interface TreeMapData {
@@ -19,30 +19,19 @@ interface TreeMapNode {
 
 const TreeMap: React.FC = () => {
     const svgRef = useRef<SVGSVGElement>(null);
-    const dispatch = useAppDispatch();
+    // const dispatch = useAppDispatch();
     const { data: tagHierarchy, status, error } = useAppSelector(state => state.tagHierarchy);
     const { data: twrData } = useAppSelector(state => state.twrUpdate);
     const [currentNode, setCurrentNode] = useState<TagHierarchyNode | null>(null);
     const [breadcrumb, setBreadcrumb] = useState<string[]>([]);
 
-    // Call the reporter API to get tag hierarchy
+    // Initialize from Redux data
     useEffect(() => {
-        const fetchTagHierarchy = async () => {
-            dispatch(setLoading());
-            try {
-                const data = await reporterApi.getTagHierarchy();
-                console.log('Tag hierarchy data:', data);
-                dispatch(setSuccess(data));
-                setCurrentNode(data);
-                setBreadcrumb([data.name]);
-            } catch (error) {
-                console.error('Failed to fetch tag hierarchy:', error);
-                dispatch(setError(error instanceof Error ? error.message : 'Failed to fetch data'));
-            }
-        };
-
-        fetchTagHierarchy();
-    }, [dispatch]);
+        if (tagHierarchy && !currentNode) {
+            setCurrentNode(tagHierarchy);
+            setBreadcrumb([tagHierarchy.name]);
+        }
+    }, [tagHierarchy, currentNode]);
 
     // Helper function to normalize values to sum to 100
     const normalizeValues = (nodes: TagHierarchyNode[]): TreeMapData[] => {

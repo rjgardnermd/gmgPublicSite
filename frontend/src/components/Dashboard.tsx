@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import { useAppSelector } from '../store/hooks';
 // import { setLoading, setSuccess, setError } from '../store/slices/tagHierarchySlice';
 import type { TagHierarchyNode } from '../models/TagHierarchy';
+import ErrorPage from './ErrorPage';
 
 interface TreeMapData {
     name: string;
@@ -182,37 +183,26 @@ const Dashboard: React.FC = () => {
         return colors[index % colors.length];
     };
 
-    // Show loading state
-    if (status === 'loading') {
-        return (
-            <div style={{ padding: '20px' }}>
-                <h1>Stock Sector TreeMap</h1>
-                <p>Loading...</p>
-            </div>
-        );
-    }
-
-    // Show error state
+    // Simple error handling - redirect to error page
     if (status === 'failed') {
-        return (
-            <div style={{ padding: '20px' }}>
-                <h1>Stock Sector TreeMap</h1>
-                <p>Error: {error}</p>
-            </div>
-        );
+        return <ErrorPage message={error} />;
     }
 
     return (
         <div style={{ padding: '20px' }}>
-            {/* TWR Display */}
-            {twrData && (
-                <div style={{
-                    marginBottom: '20px',
-                    padding: '15px',
-                    backgroundColor: 'transparent',
-                    borderRadius: '8px',
-                    textAlign: 'center'
-                }}>
+            {/* TWR Display - Always reserve space */}
+            <div style={{
+                marginBottom: '20px',
+                padding: '15px',
+                backgroundColor: 'transparent',
+                borderRadius: '8px',
+                textAlign: 'center',
+                minHeight: '80px', // Reserve space for TWR display
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                {twrData ? (
                     <div style={{
                         fontSize: '2.5rem',
                         fontWeight: 'bold',
@@ -220,37 +210,99 @@ const Dashboard: React.FC = () => {
                     }}>
                         TWR: {formatTWR(twrData.twr)}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div style={{
+                        fontSize: '2.5rem',
+                        fontWeight: 'bold',
+                        color: '#6c757d',
+                        opacity: 0.5
+                    }}>
+                        Loading TWR...
+                    </div>
+                )}
+            </div>
 
             <h1>Portfolio Composition</h1>
-            {/* Breadcrumb navigation */}
-            {breadcrumb.length > 1 && (
-                <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#2c3e50', borderRadius: '4px' }}>
-                    <span style={{ fontWeight: 'bold', color: '#ecf0f1' }}>Navigation: </span>
-                    {breadcrumb.map((item, index) => (
-                        <span key={index}>
-                            <button
-                                onClick={() => handleBreadcrumbClick(index)}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#3498db',
-                                    cursor: 'pointer',
-                                    textDecoration: 'underline',
-                                    margin: '0 5px',
-                                    fontWeight: '500'
-                                }}
-                            >
-                                {item}
-                            </button>
-                            {index < breadcrumb.length - 1 && <span style={{ color: '#95a5a6' }}> → </span>}
-                        </span>
-                    ))}
-                </div>
-            )}
 
-            <svg ref={svgRef} style={{ border: '1px solid #ccc', borderRadius: '8px' }}></svg>
+            {/* Breadcrumb navigation - Always reserve space */}
+            <div style={{
+                marginBottom: '20px',
+                padding: '10px',
+                backgroundColor: '#2c3e50',
+                borderRadius: '4px',
+                minHeight: '40px', // Reserve space for breadcrumb
+                display: 'flex',
+                alignItems: 'center'
+            }}>
+                {breadcrumb.length > 1 ? (
+                    <>
+                        <span style={{ fontWeight: 'bold', color: '#ecf0f1' }}>Navigation: </span>
+                        {breadcrumb.map((item, index) => (
+                            <span key={index}>
+                                <button
+                                    onClick={() => handleBreadcrumbClick(index)}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: '#3498db',
+                                        cursor: 'pointer',
+                                        textDecoration: 'underline',
+                                        margin: '0 5px',
+                                        fontWeight: '500'
+                                    }}
+                                >
+                                    {item}
+                                </button>
+                                {index < breadcrumb.length - 1 && <span style={{ color: '#95a5a6' }}> → </span>}
+                            </span>
+                        ))}
+                    </>
+                ) : (
+                    <span style={{ color: '#95a5a6', fontStyle: 'italic' }}>
+                        Navigation will appear here when you drill down
+                    </span>
+                )}
+            </div>
+
+            {/* SVG Container - Always reserve space */}
+            <div style={{
+                minHeight: '600px', // Reserve space for SVG
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                {status === 'loading' ? (
+                    <div style={{
+                        border: '1px solid #ccc',
+                        borderRadius: '8px',
+                        width: '800px',
+                        height: '600px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#6c757d',
+                        fontSize: '1.2rem'
+                    }}>
+                        Loading TreeMap...
+                    </div>
+                ) : currentNode ? (
+                    <svg ref={svgRef} style={{ border: '1px solid #ccc', borderRadius: '8px' }}></svg>
+                ) : (
+                    <div style={{
+                        border: '1px solid #ccc',
+                        borderRadius: '8px',
+                        width: '800px',
+                        height: '600px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#6c757d',
+                        fontSize: '1.2rem'
+                    }}>
+                        No data available
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

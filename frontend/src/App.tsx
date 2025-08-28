@@ -1,10 +1,15 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import TreeMap from './components/TreeMap';
+import { useWebSocket, ConnectionStates } from './providers/WebsocketProvider';
+import { useAuth } from './providers/AuthProvider';
+import { useAppDispatch } from './store/hooks';
+import { setSuccess, setError } from './store/slices/tagHierarchySlice';
 import './App.css';
 
+// TODO: change the jwt_secret so this hard-coded token doesn't work for the main trading app!!!
 function HomePage() {
   const [count, setCount] = useState(0);
 
@@ -35,17 +40,65 @@ function HomePage() {
 }
 
 function App() {
+  const dispatch = useAppDispatch();
+  const { connectionState, registerOnMessageHandler, registerOnOpenHandler, sendMsg } = useWebSocket();
+  const { token, setToken } = useAuth();
+  const hasRegisteredHandlers = useRef(false);
+
+  // Set the hardcoded token on app load
+  useEffect(() => {
+    if (!token) {
+      const hardcodedToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0X3VzZXIiLCJleHAiOjE5MzYzOTUxODh9.oj57qhPOKDT3TAnUPBq5disvYpj9qK_Z4_GgO3oSsos';
+      setToken(hardcodedToken);
+    }
+  }, [token, setToken]);
+
+  // WebSocket message handling
+  useEffect(() => {
+    const onWebSocketOpen = () => {
+      console.log("WebSocket connected, ready to receive updates");
+    };
+
+    const onWebSocketMessage = (jsonObj) => {
+      console.log("WebSocket message received:", jsonObj);
+
+      // Handle tag hierarchy updates
+      if (jsonObj.type === "tag_hierarchy_update" || jsonObj.channel === "tag_hierarchy") {
+        console.log("Tag hierarchy update received:", jsonObj);
+        const updatedData = jsonObj.data || jsonObj.message;
+        dispatch(setSuccess(updatedData));
+      }
+    };
+
+    if (!hasRegisteredHandlers.current) {
+      console.log("Registering WebSocket handlers in App...");
+      hasRegisteredHandlers.current = true;
+      registerOnOpenHandler(onWebSocketOpen);
+      registerOnMessageHandler(onWebSocketMessage);
+    }
+  }, [registerOnMessageHandler, registerOnOpenHandler, dispatch]);
+
+  // Log connection state changes
+  useEffect(() => {
+    console.log("WebSocket connection state:", connectionState);
+  }, [connectionState]);
+
   return (
     <Router>
       <div>
-        {/* <nav style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
+        <nav style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
           <Link to="/" style={{ marginRight: '20px', textDecoration: 'none', color: '#333' }}>
             Home
           </Link>
           <Link to="/treemap" style={{ textDecoration: 'none', color: '#333' }}>
             TreeMap
           </Link>
-        </nav> */}
+          {connectionState !== ConnectionStates.CONNECTED && (
+            <span style={{ marginLeft: '20px', color: '#f44336' }}>
+              WebSocket: {connectionState}
+            </span>
+          )}
+        </nav>
 
         <Routes>
           <Route path="/" element={<HomePage />} />

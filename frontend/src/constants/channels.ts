@@ -5,7 +5,8 @@ export const ConsumerChannels = {
     AccountUpdate: "Consumer.AccountUpdate",
     PositionUpdate: "Consumer.PositionUpdate",
     PriceNotification: "Consumer.PriceNotification",
-    OrderNotification: "Consumer.OrderNotification"
+    OrderNotification: "Consumer.OrderNotification",
+    PortfolioUpdate: "Consumer.PortfolioUpdate"
 } as const;
 
 export const SystemChannels = {

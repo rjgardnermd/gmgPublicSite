@@ -61,10 +61,10 @@ function App() {
     const onWebSocketOpen = () => {
       console.log("WebSocket connected, subscribing to channels...");
 
-      // Subscribe to TwrUpdate channel
+      // Subscribe to TwrUpdate and PortfolioUpdate channels
       const subscriptionMessage = new SubscriptionDto(
         SubscriptionAction.SUBSCRIBE,
-        [ConsumerChannels.TwrUpdate]
+        [ConsumerChannels.TwrUpdate, ConsumerChannels.PortfolioUpdate]
       );
 
       console.log("Sending subscription message:", subscriptionMessage.toStr());
@@ -74,17 +74,23 @@ function App() {
     const onWebSocketMessage = (jsonObj) => {
       console.log("WebSocket message received:", jsonObj);
 
-      // Handle tag hierarchy updates
-      if (jsonObj.type === "tag_hierarchy_update" || jsonObj.channel === "tag_hierarchy") {
-        console.log("Tag hierarchy update received:", jsonObj);
-        const updatedData = jsonObj.data || jsonObj.message;
-        dispatch(setSuccess(updatedData));
-      }
+      // // Handle tag hierarchy updates
+      // if (jsonObj.type === "tag_hierarchy_update" || jsonObj.channel === "tag_hierarchy") {
+      //   console.log("Tag hierarchy update received:", jsonObj);
+      //   const updatedData = jsonObj.data || jsonObj.message;
+      //   dispatch(setSuccess(updatedData));
+      // }
 
       // Handle TwrUpdate messages
       if (jsonObj.channel === ConsumerChannels.TwrUpdate) {
         console.log("TwrUpdate received:", jsonObj);
         dispatch(setTwrSuccess(jsonObj.message));
+      }
+
+      // Handle PortfolioUpdate messages
+      if (jsonObj.channel === ConsumerChannels.PortfolioUpdate) {
+        console.log("PortfolioUpdate received:", jsonObj);
+        dispatch(setSuccess(jsonObj.message));
       }
     };
 

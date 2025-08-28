@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { hubApi } from '../api/hubApi';
+import { reporterApi } from '../api/reporterApi';
 import type { TagHierarchyNode } from '../models/TagHierarchy';
 
 interface TreeMapData {
@@ -21,11 +21,11 @@ const TreeMap: React.FC = () => {
     const [currentNode, setCurrentNode] = useState<TagHierarchyNode | null>(null);
     const [breadcrumb, setBreadcrumb] = useState<string[]>([]);
 
-    // Call the hub API to get tag hierarchy
+    // Call the reporter API to get tag hierarchy
     useEffect(() => {
         const fetchTagHierarchy = async () => {
             try {
-                const data = await hubApi.getTagHierarchy();
+                const data = await reporterApi.getTagHierarchy();
                 console.log('Tag hierarchy data:', data);
                 setTagHierarchy(data);
                 setCurrentNode(data);

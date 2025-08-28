@@ -1,12 +1,11 @@
 import { env } from '../config/env';
 import type { TagHierarchyNode } from '../models/TagHierarchy';
 
-class HubApi {
+class ReporterApi {
     private baseUrl: string;
-    private authToken: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0X3VzZXIiLCJleHAiOjE3NTk5MTIzMzJ9.tnDADx_af64feWGdq0DVfeEGSuw5KdnM0SX7-wkqJy4';
 
     constructor() {
-        this.baseUrl = `http://${env.hubHost}:${env.hubPort}`;
+        this.baseUrl = `http://${env.reporterHost}:${env.reporterPort}`;
     }
 
     async getTagHierarchy(): Promise<TagHierarchyNode> {
@@ -15,7 +14,6 @@ class HubApi {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.authToken}`,
                 },
             });
 
@@ -33,4 +31,4 @@ class HubApi {
 }
 
 // Export a singleton instance
-export const hubApi = new HubApi();
+export const reporterApi = new ReporterApi();

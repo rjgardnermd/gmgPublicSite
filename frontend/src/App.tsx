@@ -7,6 +7,8 @@ import { useWebSocket, ConnectionStates } from './providers/WebsocketProvider';
 import { useAuth } from './providers/AuthProvider';
 import { useAppDispatch } from './store/hooks';
 import { setSuccess, setError } from './store/slices/tagHierarchySlice';
+import { ConsumerChannels } from './constants/channels';
+import { SubscriptionDto, SubscriptionAction } from './models/SubscriptionDto';
 import './App.css';
 
 // TODO: change the jwt_secret so this hard-coded token doesn't work for the main trading app!!!
@@ -56,7 +58,16 @@ function App() {
   // WebSocket message handling
   useEffect(() => {
     const onWebSocketOpen = () => {
-      console.log("WebSocket connected, ready to receive updates");
+      console.log("WebSocket connected, subscribing to channels...");
+
+      // Subscribe to TwrUpdate channel
+      const subscriptionMessage = new SubscriptionDto(
+        SubscriptionAction.SUBSCRIBE,
+        [ConsumerChannels.TwrUpdate]
+      );
+
+      console.log("Sending subscription message:", subscriptionMessage.toStr());
+      sendMsg(subscriptionMessage.toStr());
     };
 
     const onWebSocketMessage = (jsonObj) => {
@@ -68,6 +79,12 @@ function App() {
         const updatedData = jsonObj.data || jsonObj.message;
         dispatch(setSuccess(updatedData));
       }
+
+      // Handle TwrUpdate messages
+      if (jsonObj.channel === ConsumerChannels.TwrUpdate) {
+        console.log("TwrUpdate received:", jsonObj);
+        // Handle TwrUpdate data here
+      }
     };
 
     if (!hasRegisteredHandlers.current) {
@@ -76,7 +93,7 @@ function App() {
       registerOnOpenHandler(onWebSocketOpen);
       registerOnMessageHandler(onWebSocketMessage);
     }
-  }, [registerOnMessageHandler, registerOnOpenHandler, dispatch]);
+  }, [registerOnMessageHandler, registerOnOpenHandler, sendMsg, dispatch]);
 
   // Log connection state changes
   useEffect(() => {

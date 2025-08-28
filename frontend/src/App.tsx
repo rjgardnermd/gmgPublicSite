@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
-import TreeMap from './components/TreeMap';
+import Dashboard from './components/Dashboard';
 import { useWebSocket } from './providers/WebsocketProvider';
 import { useAuth } from './providers/AuthProvider';
 import { useAppDispatch } from './store/hooks';
@@ -78,7 +78,7 @@ function App() {
     <Router>
       <div>
         <Routes>
-          <Route path="/" element={<TreeMap />} />
+          <Route path="/" element={<Dashboard />} />
         </Routes>
       </div>
     </Router>

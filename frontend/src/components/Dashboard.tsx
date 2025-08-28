@@ -17,7 +17,7 @@ interface TreeMapNode {
     children: TreeMapData[];
 }
 
-const TreeMap: React.FC = () => {
+const Dashboard: React.FC = () => {
     const svgRef = useRef<SVGSVGElement>(null);
     // const dispatch = useAppDispatch();
     const { data: tagHierarchy, status, error } = useAppSelector(state => state.tagHierarchy);
@@ -255,4 +255,4 @@ const TreeMap: React.FC = () => {
     );
 };
 
-export default TreeMap;
+export default Dashboard;

@@ -21,6 +21,7 @@ const TreeMap: React.FC = () => {
     const svgRef = useRef<SVGSVGElement>(null);
     const dispatch = useAppDispatch();
     const { data: tagHierarchy, status, error } = useAppSelector(state => state.tagHierarchy);
+    const { data: twrData } = useAppSelector(state => state.twrUpdate);
     const [currentNode, setCurrentNode] = useState<TagHierarchyNode | null>(null);
     const [breadcrumb, setBreadcrumb] = useState<string[]>([]);
 
@@ -53,6 +54,12 @@ const TreeMap: React.FC = () => {
             color: getColorForIndex(index),
             node: child
         }));
+    };
+
+    // Format TWR as percentage
+    const formatTWR = (twr: number): string => {
+        const percentage = twr * 100;
+        return `${percentage >= 0 ? '+' : ''}${percentage.toFixed(4)}%`;
     };
 
     useEffect(() => {
@@ -208,8 +215,26 @@ const TreeMap: React.FC = () => {
 
     return (
         <div style={{ padding: '20px' }}>
-            <h1>Stock Sector TreeMap</h1>
+            {/* TWR Display */}
+            {twrData && (
+                <div style={{
+                    marginBottom: '20px',
+                    padding: '15px',
+                    backgroundColor: 'transparent',
+                    borderRadius: '8px',
+                    textAlign: 'center'
+                }}>
+                    <div style={{
+                        fontSize: '2.5rem',
+                        fontWeight: 'bold',
+                        color: twrData.twr >= 0 ? '#28a745' : '#dc3545'
+                    }}>
+                        TWR: {formatTWR(twrData.twr)}
+                    </div>
+                </div>
+            )}
 
+            <h1>Portfolio Composition</h1>
             {/* Breadcrumb navigation */}
             {breadcrumb.length > 1 && (
                 <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#2c3e50', borderRadius: '4px' }}>

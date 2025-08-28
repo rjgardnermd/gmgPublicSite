@@ -1,9 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import TreeMap from './components/TreeMap';
-import { useWebSocket, ConnectionStates } from './providers/WebsocketProvider';
+import { useWebSocket } from './providers/WebsocketProvider';
 import { useAuth } from './providers/AuthProvider';
 import { useAppDispatch } from './store/hooks';
 import { setSuccess } from './store/slices/tagHierarchySlice';
@@ -104,7 +104,7 @@ function App() {
   return (
     <Router>
       <div>
-        <nav style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
+        {/* <nav style={{ padding: '20px', backgroundColor: '#f5f5f5', marginBottom: '20px' }}>
           <Link to="/" style={{ marginRight: '20px', textDecoration: 'none', color: '#333' }}>
             Home
           </Link>
@@ -116,7 +116,7 @@ function App() {
               WebSocket: {connectionState}
             </span>
           )}
-        </nav>
+        </nav> */}
 
         <Routes>
           <Route path="/" element={<HomePage />} />

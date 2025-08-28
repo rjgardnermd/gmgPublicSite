@@ -6,7 +6,8 @@ import TreeMap from './components/TreeMap';
 import { useWebSocket, ConnectionStates } from './providers/WebsocketProvider';
 import { useAuth } from './providers/AuthProvider';
 import { useAppDispatch } from './store/hooks';
-import { setSuccess, setError } from './store/slices/tagHierarchySlice';
+import { setSuccess } from './store/slices/tagHierarchySlice';
+import { setSuccess as setTwrSuccess } from './store/slices/twrUpdateSlice';
 import { ConsumerChannels } from './constants/channels';
 import { SubscriptionDto, SubscriptionAction } from './models/SubscriptionDto';
 import './App.css';
@@ -83,7 +84,7 @@ function App() {
       // Handle TwrUpdate messages
       if (jsonObj.channel === ConsumerChannels.TwrUpdate) {
         console.log("TwrUpdate received:", jsonObj);
-        // Handle TwrUpdate data here
+        dispatch(setTwrSuccess(jsonObj.message));
       }
     };
 

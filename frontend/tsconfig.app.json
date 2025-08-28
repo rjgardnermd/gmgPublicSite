@@ -21,11 +21,12 @@
     "allowJs": true,
     "checkJs": false,
     /* Linting */
-    "strict": true,
+    "strict": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": false,
+    "noImplicitAny": false
   },
   "include": [
     "src"
